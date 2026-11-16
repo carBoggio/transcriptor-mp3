@@ -1,0 +1,6 @@
+.venv/
+.prueba/
+__pycache__/
+*.mp3
+*.txt
+!requirements.txt
