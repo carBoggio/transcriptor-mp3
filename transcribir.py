@@ -64,13 +64,22 @@ def transcribir(ruta_audio, ruta_salida=None, modelo="small", idioma="es",
     print(f"Cargando modelo '{modelo}' (la primera vez se descarga, puede tardar)...")
     m = cargar_modelo(modelo, usar_gpu)
 
+    # El filtro de silencios (VAD) necesita onnxruntime, que no existe para
+    # todas las versiones de Python (ej. 3.15). Si no esta, se transcribe igual.
+    try:
+        import onnxruntime  # noqa: F401
+        usar_vad = True
+    except ImportError:
+        usar_vad = False
+        print("Aviso: 'onnxruntime' no esta instalado; transcribo sin filtro de silencios.")
+
     print(f"Transcribiendo: {ruta_audio}")
     inicio = time.time()
     segmentos, info = m.transcribe(
         ruta_audio,
         language=idioma,      # "es" por defecto; None = detecta el idioma solo
         beam_size=5,
-        vad_filter=True,      # saltea silencios
+        vad_filter=usar_vad,  # saltea silencios
     )
     print(f"Idioma detectado: {info.language} "
           f"(probabilidad {info.language_probability:.0%}) - "

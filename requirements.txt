@@ -1,1 +1,7 @@
-faster-whisper>=1.1
+# Dependencias de faster-whisper (se instalan aparte para que funcione
+# tambien en Python 3.15, donde onnxruntime todavia no esta disponible).
+ctranslate2>=4.0,<5
+huggingface_hub>=0.21
+tokenizers>=0.13,<1
+av>=11
+onnxruntime>=1.14,<2 ; python_version < "3.15"

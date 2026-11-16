@@ -30,7 +30,11 @@ En CMD/PowerShell, dentro de la carpeta del programa:
 ```
 cd ruta\a\transcriptor-mp3
 python -m pip install -r requirements.txt
+python -m pip install faster-whisper --no-deps
 ```
+
+Son **dos comandos**: así funciona en cualquier Python de 3.10 a 3.15.
+(En Python 3.15 `onnxruntime` todavía no existe para Windows; el programa funciona igual, solo que sin el filtro de silencios.)
 
 ## 4. Usarlo desde CMD o PowerShell
 
@@ -86,5 +90,6 @@ Los modelos se descargan solos la primera vez y quedan guardados (`C:\Users\<vos
 ## Problemas comunes
 
 - **`python` no se reconoce**: reinstalá Python tildando *Add to PATH*, o usá `py` en vez de `python`.
-- **`No module named faster_whisper`**: corré `python -m pip install faster-whisper` (o instalalo desde Thonny).
+- **`No module named faster_whisper`**: corré los dos comandos del paso 3 (o instalalo desde Thonny).
+- **`ResolutionImpossible` / `onnxruntime` al instalar**: pasa con Python 3.15 si instalás `faster-whisper` directo. Usá los dos comandos del paso 3.
 - **`--gpu` no funciona**: requiere placa NVIDIA con drivers y librerías CUDA 12 / cuDNN 9; si falla, el programa sigue con CPU automáticamente.
