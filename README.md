@@ -9,6 +9,22 @@ No hace falta instalar `ffmpeg`.
 
 ---
 
+## Forma fácil: `transcribir.sh`
+
+1. Abrí `transcribir.sh` con un editor de texto y cambiá la línea
+   `ARCHIVO="/ruta/absoluta/al/audio.mp3"` por la ruta de tu audio.
+2. En una terminal, dentro de la carpeta del programa:
+   ```
+   ./transcribir.sh
+   ```
+
+La primera vez crea el entorno (`.venv`) e instala todo solo (tarda unos minutos).
+Las siguientes veces transcribe directo. También podés pasarle otro audio: `./transcribir.sh /ruta/otro.mp3`.
+
+En Windows se corre desde **Git Bash** (viene con Git), no desde PowerShell ni CMD.
+
+---
+
 ## 1. Instalar Python (una sola vez)
 
 1. Descargá Python 3.10 o más nuevo desde <https://www.python.org/downloads/windows/>.
