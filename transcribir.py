@@ -50,6 +50,43 @@ def cargar_modelo(nombre, usar_gpu):
     return WhisperModel(nombre, device="cpu", compute_type="int8")
 
 
+def cargar_audio(ruta_audio, frecuencia=16000):
+    """Decodifica el audio a mono 16 kHz (float32), como lo espera Whisper.
+
+    Reemplaza a faster_whisper.decode_audio, que llama a av.open(...,
+    metadata_errors=...) y se rompe con las versiones nuevas de PyAV
+    (las unicas que tienen instalador listo para Python 3.15).
+    """
+    import io
+    import av
+    import numpy as np
+
+    try:
+        contenedor = av.open(ruta_audio, mode="r", metadata_errors="ignore")
+    except TypeError:  # PyAV nuevo: ya no existe metadata_errors
+        contenedor = av.open(ruta_audio, mode="r")
+
+    resampler = av.audio.resampler.AudioResampler(
+        format="s16", layout="mono", rate=frecuencia)
+    buffer = io.BytesIO()
+    with contenedor:
+        frames = contenedor.decode(audio=0)
+        while True:
+            try:
+                frame = next(frames)
+            except StopIteration:
+                break
+            except av.error.InvalidDataError:  # frame danado: se saltea
+                continue
+            for f in resampler.resample(frame):
+                buffer.write(f.to_ndarray().tobytes())
+        for f in resampler.resample(None):  # vacia lo que quedo pendiente
+            buffer.write(f.to_ndarray().tobytes())
+
+    audio = np.frombuffer(buffer.getbuffer(), dtype=np.int16)
+    return audio.astype(np.float32) / 32768.0
+
+
 def transcribir(ruta_audio, ruta_salida=None, modelo="small", idioma="es",
                 tiempos=False, usar_gpu=False):
     if idioma in (None, "", "auto"):
@@ -75,8 +112,9 @@ def transcribir(ruta_audio, ruta_salida=None, modelo="small", idioma="es",
 
     print(f"Transcribiendo: {ruta_audio}")
     inicio = time.time()
+    audio = cargar_audio(ruta_audio)
     segmentos, info = m.transcribe(
-        ruta_audio,
+        audio,
         language=idioma,      # "es" por defecto; None = detecta el idioma solo
         beam_size=5,
         vad_filter=usar_vad,  # saltea silencios
